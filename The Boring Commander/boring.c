@@ -11,6 +11,8 @@
 #include <sys/resource.h>
 #include <unistd.h>
 
+#include <sys/wait.h>
+
 #include "boring.h"
 
 int main(int argc, char** argv) {
@@ -31,6 +33,9 @@ int main(int argc, char** argv) {
 }
 
 void execute(char** command) {
+	printf("Running command: %s\n", command[0]);
+
+
 	pid_t child = fork();
 
 	if(child < 0) {
