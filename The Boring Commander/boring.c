@@ -65,11 +65,11 @@ void execute(char** command) {
 
 void show(long elapsedTime, int pageFaults, int reclaimedPageFaults) {
 	//display the statistics
-	printf("-- Statistics ---\n");
+	printf("\n-- Statistics ---\n");
 	printf("Elapsed time: %ld milliseconds\n", elapsedTime);
 	printf("Page Faults: %d\n", pageFaults);
 	printf("Page Faults (reclaimed): %d\n", reclaimedPageFaults);
-	printf("-- End of Statistics --\n");
+	printf("-- End of Statistics --\n\n");
 }
 
 
