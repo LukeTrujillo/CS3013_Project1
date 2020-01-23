@@ -33,24 +33,32 @@ int main(int argc, char** argv) {
 }
 
 void execute(char** command) {
-	printf("Running command: %s\n", command[0]);
+	printf("Running command: %s", command[0]);
+
+	if(command[1] != NULL) { 
+		printf(" %s", command[1]);
+		if(command[2] != NULL) {
+			printf(" %s", command[2]);
+		}
+	}
+	
+	printf("\n");
 
 
 	pid_t child = fork();
 
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
+
+
 	if(child < 0) {
 		//there is an error
 	} else if(child == 0) { //this is the child process and now call exec
-		
-
 		execvp(command[0], command);
 
 	} else { //this is the parent function
 
-		struct timeval start, end;
 
-
-		gettimeofday(&start, NULL);
 		waitpid(child, NULL, 0);
 		gettimeofday(&end, NULL);
 
@@ -58,7 +66,7 @@ void execute(char** command) {
 
 		getrusage(RUSAGE_CHILDREN, &stats);
 
-		show((end.tv_sec - start.tv_sec), stats.ru_majflt, stats.ru_minflt);
+		show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt, stats.ru_minflt);
 	}
 
 }
