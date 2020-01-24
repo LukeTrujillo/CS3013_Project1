@@ -15,22 +15,40 @@
 #include <sys/wait.h>
 
 void execute(char**);
-void show(
+void show(long, long, long);
 
 int main(int argc, char** argv) {
 	
 	//load custom.txt
 
-	char *name = "custom.txt";
 	char line[1000];
 
-	FILE *fp = fopen(name, "r");
+	FILE *fp = fopen("custom.txt", "r");
 
 	if(fp != NULL) { //file was opened successfully
 
-		while(fgets(str, 1000, fp) != NULL) {
+
+		while(fgets(line, 1000, fp) != NULL) {
 			// process each command here -- using strtok
 			//handle errors and current directory as well
+
+			char *command[100];
+			
+			char *word = strtok(line, " ");
+
+			int x = 0;
+
+			for(x = 0; x < 100 && word != NULL; x++) {
+				command[x] = word;
+				word = strtok(NULL, " ");
+			}
+
+			command[x] = NULL;
+			printf("%s %s", command[0], command[1]);
+			execute(command);
+
+		
+		
 
 		}
 
@@ -94,8 +112,8 @@ void show(long elapsedTime, long pageFaults, long reclaimedPageFaults) {
 	//display the statistics
 	printf("\n-- Statistics ---\n");
 	printf("Elapsed time: %ld milliseconds\n", elapsedTime);
-	printf("Page Faults: %d\n", pageFaults);
-	printf("Page Faults (reclaimed): %d\n", reclaimedPageFaults);
+	printf("Page Faults: %ld\n", pageFaults);
+	printf("Page Faults (reclaimed): %ld\n", reclaimedPageFaults);
 	printf("-- End of Statistics --\n\n");
 }
 
