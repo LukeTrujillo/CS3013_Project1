@@ -1,6 +1,6 @@
 
 /*
- *	boring.c
+ *	custom.c
  *	Authors: Luke Trujillo, Mike Capobianco
  */
 
@@ -10,22 +10,35 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <sys/wait.h>
 
-#include "boring.h"
+void execute(char**);
+void show(
 
 int main(int argc, char** argv) {
+	
+	//load custom.txt
 
-	char *command1[] = {"whoami", NULL};
-	execute(command1);
+	char *name = "custom.txt";
+	char line[1000];
 
-	char *command2[] = {"last", NULL};
-	execute(command2);
+	FILE *fp = fopen(name, "r");
+
+	if(fp != NULL) { //file was opened successfully
+
+		while(fgets(str, 1000, fp) != NULL) {
+			// process each command here -- using strtok
+			//handle errors and current directory as well
+
+		}
 
 
-	char *command3[] = {"ls", "-al", "/home", NULL};
-	execute(command3);
+	} else {
+		printf("custom.txt could not be found or there was an error gain read permissions to the file.\n");
+		return 1;
+	}
 
 	
 
@@ -81,10 +94,9 @@ void show(long elapsedTime, long pageFaults, long reclaimedPageFaults) {
 	//display the statistics
 	printf("\n-- Statistics ---\n");
 	printf("Elapsed time: %ld milliseconds\n", elapsedTime);
-	printf("Page Faults: %ld\n", pageFaults);
-	printf("Page Faults (reclaimed): %ld\n", reclaimedPageFaults);
+	printf("Page Faults: %d\n", pageFaults);
+	printf("Page Faults (reclaimed): %d\n", reclaimedPageFaults);
 	printf("-- End of Statistics --\n\n");
 }
-
 
 
