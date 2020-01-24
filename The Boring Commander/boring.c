@@ -32,6 +32,8 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+long pageFaults = 0, reclaimedPageFaults = 0;
+
 void execute(char** command) {
 	printf("Running command: %s", command[0]);
 
@@ -56,6 +58,7 @@ void execute(char** command) {
 	} else if(child == 0) { //this is the child process and now call exec
 		execvp(command[0], command);
 
+
 	} else { //this is the parent function
 
 
@@ -63,10 +66,13 @@ void execute(char** command) {
 		gettimeofday(&end, NULL);
 
 		struct rusage stats;
+		getrusage(RUSAGE_SELF, &stats);
 
-		getrusage(RUSAGE_CHILDREN, &stats);
 
-		show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt, stats.ru_minflt);
+		show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
+
+		pageFaults = stats.ru_majflt;
+		reclaimedPageFaults = stats.ru_minflt;
 	}
 
 }
