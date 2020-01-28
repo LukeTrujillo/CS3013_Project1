@@ -17,21 +17,19 @@
 void execute(char**);
 void show(long, long, long);
 
+char workingDirectory[100];
+
 int main(int argc, char** argv) {
 	
 	//load custom.txt
-
 	char line[1000];
 
 	FILE *fp = fopen("custom.txt", "r");
 
 	if(fp != NULL) { //file was opened successfully
 
-
-		while(fgets(line, 1000, fp) != NULL) {
-			// process each command here -- using strtok
-			//handle errors and current directory as well
-
+		
+		while(fgets(line, 1000, fp) != NULL && !feof(fp) && strcmp("\n", line)) {
 			char *command[100];
 			
 			char *word = strtok(line, " ");
@@ -44,13 +42,25 @@ int main(int argc, char** argv) {
 			}
 
 			command[x] = NULL;
-			printf("%s %s", command[0], command[1]);
-			execute(command);
+			printf("%s %s\n", command[0], command[1]);
 
+
+			if(strcmp(command[0], "ccd") == 0) {
+
+				strcpy(workingDirectory, command[1]);
+				printf("Changed to directroy: %s\n", workingDirectory);
+				
+				
+			} else {
+			
+				execute(command);
+			}
 		
 		
 
 		}
+
+		fclose(fp);
 
 
 	} else {
@@ -87,6 +97,12 @@ void execute(char** command) {
 	if(child < 0) {
 		//there is an error
 	} else if(child == 0) { //this is the child process and now call exec
+
+		chdir(workingDirectory);
+
+		char path[100];
+		printf("Current directory: %s\n", getcwd(path, 100));
+	
 		execvp(command[0], command);
 
 
