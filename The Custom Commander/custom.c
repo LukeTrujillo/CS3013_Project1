@@ -14,14 +14,30 @@
 
 #include <sys/wait.h>
 
-void execute(char**);
+void execute(char**, int);
 void show(long, long, long);
+
+char* fGetsWithoutNewline(char *, int, FILE *);
 
 char workingDirectory[100];
 
+
+char* fGetsWithoutNewline(char *line, int buffer, FILE *fp) {
+	char *result = fgets(line, buffer, fp);
+
+	size_t ln = strlen(line) - 1;
+
+	if(strcmp(line, "\n") == 0)
+		return NULL;
+
+	if(line[ln] == '\n') 
+		line[ln] = '\0';
+	return result;
+}
+
+
+
 int main(int argc, char** argv) {
-	
-	//load custom.txt
 	char line[1000];
 
 	FILE *fp = fopen("custom.txt", "r");
@@ -29,7 +45,7 @@ int main(int argc, char** argv) {
 	if(fp != NULL) { //file was opened successfully
 
 		
-		while(fgets(line, 1000, fp) != NULL && !feof(fp) && strcmp("\n", line)) {
+		while(fGetsWithoutNewline(line, 1000, fp)!= NULL && !feof(fp) && strcmp("\n", line)) {
 			char *command[100];
 			
 			char *word = strtok(line, " ");
@@ -42,21 +58,35 @@ int main(int argc, char** argv) {
 			}
 
 			command[x] = NULL;
-			printf("%s %s\n", command[0], command[1]);
+
+			printf("Running command: %s", command[0]);
+
+			for(int y = 1; y < x; y++) {
+				printf(" %s", command[y]);
+			}
+
+			printf("\n");
+
 
 
 			if(strcmp(command[0], "ccd") == 0) {
 
 				strcpy(workingDirectory, command[1]);
-				printf("Changed to directroy: %s\n", workingDirectory);
+				printf("Changed to directory: %s\n", workingDirectory);
 				
 				
+			} else if(strcmp(command[0], "cpwd") == 0) {
+				chdir(workingDirectory);
+	
+				char path[100];
+				printf("Current directory: %s\n", getcwd(path, 100));
+
 			} else {
 			
-				execute(command);
+				execute(command, x);
 			}
 		
-		
+			printf("\n");
 
 		}
 
@@ -75,17 +105,8 @@ int main(int argc, char** argv) {
 
 long pageFaults = 0, reclaimedPageFaults = 0;
 
-void execute(char** command) {
-	printf("Running command: %s", command[0]);
+void execute(char** command, int args) {
 
-	if(command[1] != NULL) { 
-		printf(" %s", command[1]);
-		if(command[2] != NULL) {
-			printf(" %s", command[2]);
-		}
-	}
-	
-	printf("\n");
 
 
 	pid_t child = fork();
@@ -99,12 +120,7 @@ void execute(char** command) {
 	} else if(child == 0) { //this is the child process and now call exec
 
 		chdir(workingDirectory);
-
-		char path[100];
-		printf("Current directory: %s\n", getcwd(path, 100));
-	
 		execvp(command[0], command);
-
 
 	} else { //this is the parent function
 
@@ -130,7 +146,7 @@ void show(long elapsedTime, long pageFaults, long reclaimedPageFaults) {
 	printf("Elapsed time: %ld milliseconds\n", elapsedTime);
 	printf("Page Faults: %ld\n", pageFaults);
 	printf("Page Faults (reclaimed): %ld\n", reclaimedPageFaults);
-	printf("-- End of Statistics --\n\n");
+	printf("-- End of Statistics --\n");
 }
 
 
