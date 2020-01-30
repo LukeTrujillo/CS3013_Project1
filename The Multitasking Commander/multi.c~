@@ -15,18 +15,32 @@
 #include <sys/wait.h>
 
 char* readLine(char*, unsigned int, FILE*);
-void execute(char**, int, int);
+int execute(char**, int, int);
 void show(long, long, long);
+
+
 
 
 char workingDirectory[100];
 
 
+int runningProcess = 0;
 
 int lineNumber;
+char line[1000];
+
+struct BackgroundJob {
+	int id, running;
+	char *command;
+};
+
+int jobIndex;
+
+struct BackgroundJob jobs[10];
+
 
 int main(int argc, char** argv) {
-	char line[1000];
+	jobIndex = 0;
 
 	FILE *fp = fopen("multi.txt", "r");
 
@@ -72,6 +86,17 @@ int main(int argc, char** argv) {
 				char path[100];
 				printf("Current directory: %s\n", getcwd(path, 100));
 
+			} else if(strcmp(command[0], "cproclist") == 0) {
+
+				printf("here %d\n", jobIndex);
+
+				for(int b = 0; b < jobIndex; b++) {
+					//if(jobs[b].running == 0) {
+						printf("[%d] %s\n", jobs[b].id, jobs[b].command);
+					//}
+				}
+				
+
 			} else {
 
 
@@ -81,10 +106,12 @@ int main(int argc, char** argv) {
 
 					if(atoi(argv[i]) == lineNumber) {
 						runBG = 1;
+						break;
 					}
 				}
 			
-				execute(command, x, runBG);
+					int res = execute(command, x, runBG);
+
 			}
 		
 			printf("\n");
@@ -101,9 +128,13 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	
+	int status;
+	pid_t wpid;
 
+	while((wpid = wait(&status)) > 0);
 
-  return 0;
+  	return 0;
 }
 
 char* readLine(char *line, unsigned int buffer, FILE *fp) {
@@ -122,47 +153,63 @@ char* readLine(char *line, unsigned int buffer, FILE *fp) {
 
 long pageFaults = 0, reclaimedPageFaults = 0;
 
-void execute(char** command, int args, int background) {
+int execute(char** command, int args, int background) {
+	printf("running command %s\n", line);
+	
 
-
-
-	pid_t child = fork();
-
-	struct timeval start, end;
-	gettimeofday(&start, NULL);
-
-
-	if(child < 0) {
-		//there is an error
-	} else if(child == 0) { //this is the child process and now call exec
-
-		chdir(workingDirectory);
-		execvp(command[0], command);
-
-	} else { //this is the parent function
-
-
-		if(!background)
+	if(background == 0) {
+		int status;
+		pid_t child = fork();
+		if(child == 0) {
+			execvp(command[0], command);
+			exit(0);
+		} else {
 			waitpid(child, NULL, 0);
+			printf("done with forground\n");
+
+		} 
+	} if(background == 1) {
+		
+		struct BackgroundJob job;
+		job.id = jobIndex;
+		strcpy(job.command, &command[0]);
+	
+
+		jobs[jobIndex] = job;
+		
+
+		
+		int status;
+		pid_t child = fork();
+
+		if(child == 0) {
+
+			pid_t second = fork();
+		
+			if(second == 0) {
+				execvp(command[0], command);
+			} else {
+		
+				waitpid(second, NULL, 0);
+
+				//[jobIndex].running = 1;
+					
+				printf("done with background\n");
+			}
+
+			exit(0);
+			
+		} else {
+			jobIndex++;
+		}
 
 
-		gettimeofday(&end, NULL);
-
-		struct rusage stats;
-		getrusage(RUSAGE_SELF, &stats);
-
-
-		show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
-
-		pageFaults = stats.ru_majflt;
-		reclaimedPageFaults = stats.ru_minflt;
 	}
-
 }
 
 void show(long elapsedTime, long pageFaults, long reclaimedPageFaults) {
 	//display the statistics
-	printf("\n-- Statistics ---\n");
+	printf("\n-- Satistics ---\n");
 	printf("Elapsed time: %ld milliseconds\n", elapsedTime);
 	printf("Page Faults: %ld\n", pageFaults);
 	printf("Page Faults (reclaimed): %ld\n", reclaimedPageFaults);
