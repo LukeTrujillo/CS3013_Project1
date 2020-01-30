@@ -31,7 +31,7 @@ char line[1000];
 
 struct BackgroundJob {
 	int id, running;
-	char *command;
+	char command[100];
 };
 
 int jobIndex;
@@ -88,12 +88,12 @@ int main(int argc, char** argv) {
 
 			} else if(strcmp(command[0], "cproclist") == 0) {
 
-				printf("here %d\n", jobIndex);
+				//printf("here %d\n", jobIndex);
 
 				for(int b = 0; b < jobIndex; b++) {
-					//if(jobs[b].running == 0) {
+					if(jobs[b].running == 0) {
 						printf("[%d] %s\n", jobs[b].id, jobs[b].command);
-					//}
+					}
 				}
 				
 
@@ -172,7 +172,7 @@ int execute(char** command, int args, int background) {
 		
 		struct BackgroundJob job;
 		job.id = jobIndex;
-		//strcpy(job.command, &command[0]);
+		strcpy(job.command, command[0]);
 	
 
 		jobs[jobIndex] = job;
@@ -192,9 +192,9 @@ int execute(char** command, int args, int background) {
 		
 				waitpid(second, NULL, 0);
 
-				//[jobIndex].running = 1;
+				jobs[jobIndex].running = 1;
 					
-				printf("done with background\n");
+				printf("done with background ID: [%i]\n", jobIndex);
 			}
 
 			exit(0);
