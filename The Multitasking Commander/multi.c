@@ -15,7 +15,7 @@
 #include <sys/wait.h>
 
 char* readLine(char*, unsigned int, FILE*);
-int execute(char**, int, int);
+int execute(char*, char**, int, int);
 void show(long, long, long);
 
 
@@ -49,8 +49,9 @@ int main(int argc, char** argv) {
 
 	
 		lineNumber = 1;
-		
+		char fullLine[100];
 		while(readLine(line, 1000, fp)!= NULL && !feof(fp) && strcmp("\n", line)) {
+		strcpy(fullLine, line);
 			char *command[100];
 			
 			char *word = strtok(line, " ");
@@ -110,7 +111,7 @@ int main(int argc, char** argv) {
 					}
 				}
 			
-					int res = execute(command, x, runBG);
+					int res = execute(fullLine, command, x, runBG);
 
 			}
 		
@@ -153,7 +154,7 @@ char* readLine(char *line, unsigned int buffer, FILE *fp) {
 
 long pageFaults = 0, reclaimedPageFaults = 0;
 
-int execute(char** command, int args, int background) {
+int execute(char* line, char** command, int args, int background) {
 	printf("running command %s\n", line);
 	
 
@@ -172,7 +173,8 @@ int execute(char** command, int args, int background) {
 		
 		struct BackgroundJob job;
 		job.id = jobIndex;
-		strcpy(job.command, command[0]);
+		job.running = 0;
+		strcpy(job.command, line);
 	
 
 		jobs[jobIndex] = job;
@@ -192,9 +194,9 @@ int execute(char** command, int args, int background) {
 		
 				waitpid(second, NULL, 0);
 
+				printf("-- Job Complete [%i: %s] --\n", jobIndex, line);
 				jobs[jobIndex].running = 1;
-					
-				printf("done with background ID: [%i]\n", jobIndex);
+
 			}
 
 			exit(0);
