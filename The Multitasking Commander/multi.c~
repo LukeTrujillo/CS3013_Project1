@@ -15,7 +15,7 @@
 #include <sys/wait.h>
 
 char* readLine(char*, unsigned int, FILE*);
-int execute(char**, int, int);
+int execute(char*, char**, int, int);
 void show(long, long, long);
 
 
@@ -31,7 +31,7 @@ char line[1000];
 
 struct BackgroundJob {
 	int id, running;
-	char *command;
+	char command[100];
 };
 
 int jobIndex;
@@ -49,8 +49,9 @@ int main(int argc, char** argv) {
 
 	
 		lineNumber = 1;
-		
+		char fullLine[100];
 		while(readLine(line, 1000, fp)!= NULL && !feof(fp) && strcmp("\n", line)) {
+		strcpy(fullLine, line);
 			char *command[100];
 			
 			char *word = strtok(line, " ");
@@ -88,12 +89,12 @@ int main(int argc, char** argv) {
 
 			} else if(strcmp(command[0], "cproclist") == 0) {
 
-				printf("here %d\n", jobIndex);
+				//printf("here %d\n", jobIndex);
 
 				for(int b = 0; b < jobIndex; b++) {
-					//if(jobs[b].running == 0) {
+					if(jobs[b].running == 0) {
 						printf("[%d] %s\n", jobs[b].id, jobs[b].command);
-					//}
+					}
 				}
 				
 
@@ -110,7 +111,7 @@ int main(int argc, char** argv) {
 					}
 				}
 			
-					int res = execute(command, x, runBG);
+					int res = execute(fullLine, command, x, runBG);
 
 			}
 		
@@ -152,30 +153,50 @@ char* readLine(char *line, unsigned int buffer, FILE *fp) {
 } 
 
 long pageFaults = 0, reclaimedPageFaults = 0;
+long bgpageFaults = 0, bgreclaimedPageFaults = 0;
 
-int execute(char** command, int args, int background) {
-	printf("running command %s\n", line);
-	
+int execute(char* line, char** command, int args, int background) {
 
 	if(background == 0) {
 		int status;
 		pid_t child = fork();
+
+		
+		struct timeval start, end;
+		gettimeofday(&start, NULL);
+
+
 		if(child == 0) {
+
+			chdir(workingDirectory);
 			execvp(command[0], command);
 			exit(0);
 		} else {
 			waitpid(child, NULL, 0);
-			printf("done with forground\n");
+			
+			gettimeofday(&end, NULL);
+
+			struct rusage stats;
+			getrusage(RUSAGE_SELF, &stats);
+
+
+			show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
+
+			pageFaults = stats.ru_majflt;
+			reclaimedPageFaults = stats.ru_minflt;
 
 		} 
 	} if(background == 1) {
 		
 		struct BackgroundJob job;
 		job.id = jobIndex;
-		strcpy(job.command, &command[0]);
+		job.running = 0;
+		strcpy(job.command, line);
 	
 
 		jobs[jobIndex] = job;
+
+		printf("Background: ID [%d]: %s\n\n", jobIndex, line);
 		
 
 		
@@ -185,16 +206,33 @@ int execute(char** command, int args, int background) {
 		if(child == 0) {
 
 			pid_t second = fork();
+			
+			struct timeval start, end;
+			gettimeofday(&start, NULL);
 		
 			if(second == 0) {
+
+			chdir(workingDirectory);
 				execvp(command[0], command);
 			} else {
 		
 				waitpid(second, NULL, 0);
 
-				//[jobIndex].running = 1;
-					
-				printf("done with background\n");
+				printf("\n-- Job Complete [%i: %s] --\n", jobIndex, line);
+				printf("Process ID: %d\n", second);
+				jobs[jobIndex].running = 1;
+
+				gettimeofday(&end, NULL);
+
+				struct rusage stats;
+				getrusage(RUSAGE_CHILDREN, &stats);
+
+
+				show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - bgpageFaults, stats.ru_minflt - bgreclaimedPageFaults);
+
+				bgpageFaults = stats.ru_majflt;
+				bgreclaimedPageFaults = stats.ru_minflt;
+
 			}
 
 			exit(0);

@@ -153,20 +153,37 @@ char* readLine(char *line, unsigned int buffer, FILE *fp) {
 } 
 
 long pageFaults = 0, reclaimedPageFaults = 0;
+long bgpageFaults = 0, bgreclaimedPageFaults = 0;
 
 int execute(char* line, char** command, int args, int background) {
-	printf("running command %s\n", line);
-	
 
 	if(background == 0) {
 		int status;
 		pid_t child = fork();
+
+		
+		struct timeval start, end;
+		gettimeofday(&start, NULL);
+
+
 		if(child == 0) {
+
+			chdir(workingDirectory);
 			execvp(command[0], command);
 			exit(0);
 		} else {
 			waitpid(child, NULL, 0);
-			printf("done with forground\n");
+			
+			gettimeofday(&end, NULL);
+
+			struct rusage stats;
+			getrusage(RUSAGE_SELF, &stats);
+
+
+			show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
+
+			pageFaults = stats.ru_majflt;
+			reclaimedPageFaults = stats.ru_minflt;
 
 		} 
 	} if(background == 1) {
@@ -178,6 +195,8 @@ int execute(char* line, char** command, int args, int background) {
 	
 
 		jobs[jobIndex] = job;
+
+		printf("Background: ID [%d]: %s\n\n", jobIndex, line);
 		
 
 		
@@ -187,15 +206,32 @@ int execute(char* line, char** command, int args, int background) {
 		if(child == 0) {
 
 			pid_t second = fork();
+			
+			struct timeval start, end;
+			gettimeofday(&start, NULL);
 		
 			if(second == 0) {
+
+			chdir(workingDirectory);
 				execvp(command[0], command);
 			} else {
 		
 				waitpid(second, NULL, 0);
 
-				printf("-- Job Complete [%i: %s] --\n", jobIndex, line);
+				printf("\n-- Job Complete [%i: %s] --\n", jobIndex, line);
+				printf("Process ID: %d\n", second);
 				jobs[jobIndex].running = 1;
+
+				gettimeofday(&end, NULL);
+
+				struct rusage stats;
+				getrusage(RUSAGE_SELF, &stats);
+
+
+				show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - bgpageFaults, stats.ru_minflt - bgreclaimedPageFaults);
+
+				bgpageFaults = stats.ru_majflt;
+				bgreclaimedPageFaults = stats.ru_minflt;
 
 			}
 
