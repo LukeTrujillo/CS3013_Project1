@@ -13,137 +13,252 @@
 #include <string.h>
 
 #include <sys/wait.h>
+#include <time.h>
 
-char* readLine(char*, unsigned int, FILE*);
-int execute(char*, char**, int, int);
+#define MAX_JOBS 10
+#define CMD_MAX_LENGTH 1000
+
+void check();
+void checkBackground();
+void checkForeground();
+
+void next();
+
+
+char line[CMD_MAX_LENGTH];
+char *execCMD[100];
+
+FILE *fp;
+char* getLine();
+
+int lineNum;
+int end_of_file;
+int cpy_argc;
+char** cpy_argv;
+
 void show(long, long, long);
 
+void getExecCMD();
 
+struct Job {
+	pid_t process;
+	int id, running, background;
+	char command[CMD_MAX_LENGTH];
+	struct timeval start, end;
+};
 
+struct Job running[MAX_JOBS];
+int jobIndex;
+int lastJobID;
+
+long pageFaults = 0;
+long reclaimedPageFaults = 0;
 
 char workingDirectory[100];
 
-
-int runningProcess = 0;
-
-int lineNumber;
-char line[1000];
-
-struct BackgroundJob {
-	int id, running; //running is flag (0 if running)
-	char command[100];
-	pid_t process;
-};
-
-int jobIndex;
-
-struct BackgroundJob jobs[10];
-
-
 int main(int argc, char** argv) {
+	lastJobID = 0;
 	jobIndex = 0;
+	lineNum = 0;
 
-	FILE *fp = fopen("multi.txt", "r");
+	cpy_argc = argc;
+	cpy_argv = argv;
 
-	if(fp != NULL) { //file was opened successfully
 
-
+	//file setup stuff
+	fp = fopen("multi.txt", "r");
 	
-		lineNumber = 1;
-		char fullLine[100];
-		//read lines until eof or blank line
-		while(readLine(line, 1000, fp)!= NULL && !feof(fp) && strcmp("\n", line)) {
-			strcpy(fullLine, line);
-			char *command[100];
-	
-			char *word = strtok(line, " ");
-	
-			int x = 0;
-			//split command at spaces
-			for(x = 0; x < 100 && word != NULL; x++) {
-				command[x] = word;
-				word = strtok(NULL, " ");
-			}
+	if(fp != NULL) { //file successfully opened
+		end_of_file = 0;
 
-			command[x] = NULL;
-
-			printf("Running command: %s", command[0]);
-
-			for(int y = 1; y < x; y++) {
-				printf(" %s", command[y]);
-			}
-
-			printf("\n");
-
-
-			//check if command is ccd
-			if(strcmp(command[0], "ccd") == 0) {
-
-				strcpy(workingDirectory, command[1]);
-				printf("Changed to directory: %s\n", workingDirectory);
-				
-				//check if command is cpwd
-			} else if(strcmp(command[0], "cpwd") == 0) {
-				chdir(workingDirectory);
-	
-				char path[100];
-				printf("Current directory: %s\n", getcwd(path, 100));
-
-			//check if command is cproclist
-			} else if(strcmp(command[0], "cproclist") == 0) {
-				
-				//print job if its running flag is 0
-				for(int b = 0; b < jobIndex; b++) {
-					printf("job address: %p %d \n", &jobs[b].running, jobs[b].process);
-
-					if(jobs[b].running == 0) {
-						printf("[%d] %s\n", jobs[b].id, jobs[b].command);
-					}
-				}
-				
-
-			} else {//else execute normally
-
-
-				int runBG = 0;
-				//check if command executes in fore/background
-				for(int i = 1; i < argc; i++) {
-
-					if(atoi(argv[i]) == lineNumber) {
-						runBG = 1;
-						break;
-					}
-				}
-			
-					int res = execute(fullLine, command, x, runBG);
-
-			}
+		next();
 		
-			printf("\n");
+		int status;
+//!end_of_file && wait(&status) > 0
+		while(1) {
+			check();
 
-			lineNumber++; 
+
+			if(end_of_file) {	
+				int found = 0;
+				for(int x = 0; x <= jobIndex; x++) {
+					if(running[x].running == 1) {found = 1; break;}
+				}
+
+				if(found == 0) {break;}
+			}
+		}
+
+
+		check();
+
+		fclose(fp);
+	}
+
+
+
+
+ return 0;
+}
+
+
+void check() {	
+
+
+	for(int x = 0; x < MAX_JOBS; x++) {
+
+		int status;
+		if(running[x].running == 1 && waitpid(running[x].process, &status, WNOHANG) == running[x].process) {
+			gettimeofday(&running[x].end, NULL);
+			running[x].running = 0;
+
+
+			if(running[x].background) {
+				printf("\n-- Job Complete[%d: %s]--\nProcess ID: %d\n\n", running[x].id, running[x].command, running[x].process);
+			}
+	
+			struct rusage stats;
+			getrusage(RUSAGE_CHILDREN, &stats);
+
+
+			long seconds = running[x].end.tv_sec - running[x].start.tv_sec;
+			long micros = ((seconds * 1000000) + running[x].end.tv_usec) - (running[x].start.tv_usec);
+		
+
+			show((micros / 1000), stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
+
+		
+
+			pageFaults = stats.ru_majflt;
+			reclaimedPageFaults = stats.ru_minflt;
+
+			if(!end_of_file && !running[x].background) { next(); } //call for the next task to be executed
 
 		}
 
-		fclose(fp);
+	}
+
+}
 
 
-	} else {
-		printf("custom.txt could not be found or there was an error gain read permissions to the file.\n");
-		return 1;
+
+void getExecCMD() {
+
+	char l[CMD_MAX_LENGTH];
+
+	strcpy(l, line);
+
+	char *word = strtok(l, " ");
+
+	int x = 0;
+
+	for(x = 0; x < 100 && word != NULL; x++) {
+		execCMD[x] = word;
+		word = strtok(NULL, " ");
 	}
 
 	
-	int status;
-	pid_t wpid;
-
-	while((wpid = wait(&status)) > 0);
-
-  	return 0;
 }
 
-char* readLine(char *line, unsigned int buffer, FILE *fp) {
-	char *result = fgets(line, buffer, fp);
+//only called by foreground
+void next() {
+
+	//read in the file
+	char *res = getLine(); // reads next line and stores in line variable
+
+	if(res == NULL || !strcmp("\n", line)) { //file is over so no more reading
+		end_of_file = 1;
+		return;
+	}
+
+	lineNum++;
+
+	
+	int background = 0; //determine if its backfground
+	
+	for(int x = 0; x < cpy_argc; x++) {
+		if(lineNum == atoi(cpy_argv[x])) {
+			background = 1;
+			break;
+		}
+	}
+
+	getExecCMD(); //format the line for the exec call
+
+
+
+	printf("\nRunning command: %s\n", line);
+
+	if(strcmp(execCMD[0], "ccd") == 0) {
+
+		strcpy(workingDirectory, execCMD[1]);
+		printf("Changed to directory: %s\n", workingDirectory);
+
+		next();
+
+		return;
+		
+		//check if command is cpwd
+	} else if(strcmp(execCMD[0], "cpwd") == 0) {
+		chdir(workingDirectory);
+
+		char path[100];
+		printf("Current directory: %s\n", getcwd(path, 100));
+
+		next();
+		return;
+	//check if command is cproclist
+	} else if(strcmp(execCMD[0], "cproclist") == 0) {
+		
+		//print job if its running flag is 0
+		for(int b = 0; b < jobIndex; b++) {
+
+
+			if(running[b].running == 1 && running[b].background == 1) {
+				printf("[%d] %s\n", running[b].id, running[b].command);
+			}
+		}
+		
+		next();
+		return;
+	}
+
+
+	struct Job job;
+	job.running = 1;
+
+	strcpy(job.command, line);
+
+	if(background == 1) {
+		job.background = 1;
+		job.id = lastJobID;
+
+		printf("Background: ID [%i]: %s\n\n\n", job.id, job.command);
+		lastJobID++;
+	} else {
+		job.background = 0;
+	}
+
+	gettimeofday(&job.start, NULL);
+
+	job.process = fork();
+
+	if(job.process == 0) { //child
+		execvp(execCMD[0], execCMD);
+		exit(0); //close the child to avoid bad things
+	}
+
+	running[jobIndex] = job;
+	jobIndex++;
+
+	if(background) {
+		next();
+	}
+
+}
+
+char* getLine() {
+	char *result = fgets(line, CMD_MAX_LENGTH, fp);
 
 	size_t ln = strlen(line) - 1;
 
@@ -152,109 +267,10 @@ char* readLine(char *line, unsigned int buffer, FILE *fp) {
 
 	if(line[ln] == '\n') 
 		line[ln] = '\0';
-	
+
 	return result;
-} 
-
-long pageFaults = 0, reclaimedPageFaults = 0;
-long bgpageFaults = 0, bgreclaimedPageFaults = 0;
-
-int execute(char* line, char** command, int args, int background) {
-
-	if(background == 0) {//run in foreground
-		int status;
-		pid_t child = fork();
-
-		
-		struct timeval start, end;
-		gettimeofday(&start, NULL);
-
-
-		if(child == 0) {
-
-			chdir(workingDirectory);
-			execvp(command[0], command);
-			exit(0);
-		} else {
-			waitpid(child, NULL, 0);
-			
-			gettimeofday(&end, NULL);
-
-			struct rusage stats;
-			getrusage(RUSAGE_SELF, &stats);
-
-			//display statistics
-			show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
-
-			pageFaults = stats.ru_majflt;
-			reclaimedPageFaults = stats.ru_minflt;
-
-		} 
-	} if(background == 1) {//run in background
-		//add job to array of background jobs
-		struct BackgroundJob job;
-		job.id = jobIndex;
-		job.running = 0;
-		strcpy(job.command, line);
-
-
-		printf("Background: ID [%d]: %s\n\n", jobIndex, line);
-		
-		jobs[jobIndex] = job;
-		
-		int status;
-		pid_t child = fork();
-
-		jobs[jobIndex].process = child;
-
-		int holdIndex = jobIndex;
-		
-		pid_t second;
-
-		if(child == 0) {
-
-			second = fork();
-
-			
-			struct timeval start, end;
-			gettimeofday(&start, NULL);
-		
-			if(second == 0) {
-
-				chdir(workingDirectory);
-				execvp(command[0], command);
-			} else {
-				waitpid(second, NULL, 0);
-				//when jo finishes, say it completed and set running to 1
-				printf("\n-- Job Complete [%i: %s] --\n", jobIndex, line);
-				printf("Process ID: %d\n", second);
-
-				jobs[holdIndex].running = 1;
-				
-			
-				gettimeofday(&end, NULL);
-
-				struct rusage stats;
-				getrusage(RUSAGE_SELF, &stats);
-
-				//display statistics
-				show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - bgpageFaults, stats.ru_minflt - bgreclaimedPageFaults);
-
-				bgpageFaults = stats.ru_majflt;
-				bgreclaimedPageFaults = stats.ru_minflt;
-
-			}
-
-			exit(second);
-			
-		} else {
-			//increase the number of running jobs
-			jobIndex++;
-		}
-
-
-	}
 }
+
 
 void show(long elapsedTime, long pageFaults, long reclaimedPageFaults) {
 	//display the statistics
@@ -264,7 +280,3 @@ void show(long elapsedTime, long pageFaults, long reclaimedPageFaults) {
 	printf("Page Faults (reclaimed): %ld\n", reclaimedPageFaults);
 	printf("-- End of Statistics --\n");
 }
-
-
-
-
