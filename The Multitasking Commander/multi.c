@@ -30,7 +30,7 @@ int lineNumber;
 char line[1000];
 
 struct BackgroundJob {
-	int id, running;
+	int id, running; //running is flag (0 if running)
 	char command[100];
 };
 
@@ -50,14 +50,15 @@ int main(int argc, char** argv) {
 	
 		lineNumber = 1;
 		char fullLine[100];
+		//read lines until eof or blank line
 		while(readLine(line, 1000, fp)!= NULL && !feof(fp) && strcmp("\n", line)) {
-		strcpy(fullLine, line);
+			strcpy(fullLine, line);
 			char *command[100];
-			
+	
 			char *word = strtok(line, " ");
-
+	
 			int x = 0;
-
+			//split command at spaces
 			for(x = 0; x < 100 && word != NULL; x++) {
 				command[x] = word;
 				word = strtok(NULL, " ");
@@ -74,23 +75,23 @@ int main(int argc, char** argv) {
 			printf("\n");
 
 
-
+			//check if command is ccd
 			if(strcmp(command[0], "ccd") == 0) {
 
 				strcpy(workingDirectory, command[1]);
 				printf("Changed to directory: %s\n", workingDirectory);
 				
-				
+				//check if command is cpwd
 			} else if(strcmp(command[0], "cpwd") == 0) {
 				chdir(workingDirectory);
 	
 				char path[100];
 				printf("Current directory: %s\n", getcwd(path, 100));
 
+			//check if command is cproclist
 			} else if(strcmp(command[0], "cproclist") == 0) {
-
-				//printf("here %d\n", jobIndex);
-
+				
+				//print job if its running flag is 0
 				for(int b = 0; b < jobIndex; b++) {
 					if(jobs[b].running == 0) {
 						printf("[%d] %s\n", jobs[b].id, jobs[b].command);
@@ -98,11 +99,11 @@ int main(int argc, char** argv) {
 				}
 				
 
-			} else {
+			} else {//else execute normally
 
 
 				int runBG = 0;
-
+				//check if command executes in fore/background
 				for(int i = 1; i < argc; i++) {
 
 					if(atoi(argv[i]) == lineNumber) {
@@ -157,7 +158,7 @@ long bgpageFaults = 0, bgreclaimedPageFaults = 0;
 
 int execute(char* line, char** command, int args, int background) {
 
-	if(background == 0) {
+	if(background == 0) {//run in foreground
 		int status;
 		pid_t child = fork();
 
@@ -179,15 +180,15 @@ int execute(char* line, char** command, int args, int background) {
 			struct rusage stats;
 			getrusage(RUSAGE_SELF, &stats);
 
-
+			//display statistics
 			show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
 
 			pageFaults = stats.ru_majflt;
 			reclaimedPageFaults = stats.ru_minflt;
 
 		} 
-	} if(background == 1) {
-		
+	} if(background == 1) {//run in background
+		//add job to array of background jobs
 		struct BackgroundJob job;
 		job.id = jobIndex;
 		job.running = 0;
@@ -217,7 +218,7 @@ int execute(char* line, char** command, int args, int background) {
 			} else {
 		
 				waitpid(second, NULL, 0);
-
+				//when jo finishes, say it completed and set running to 1
 				printf("\n-- Job Complete [%i: %s] --\n", jobIndex, line);
 				printf("Process ID: %d\n", second);
 				jobs[jobIndex].running = 1;
@@ -227,7 +228,7 @@ int execute(char* line, char** command, int args, int background) {
 				struct rusage stats;
 				getrusage(RUSAGE_SELF, &stats);
 
-
+				//display statistics
 				show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - bgpageFaults, stats.ru_minflt - bgreclaimedPageFaults);
 
 				bgpageFaults = stats.ru_majflt;
@@ -238,6 +239,7 @@ int execute(char* line, char** command, int args, int background) {
 			exit(0);
 			
 		} else {
+			//increase the number of running jobs
 			jobIndex++;
 		}
 
@@ -247,7 +249,7 @@ int execute(char* line, char** command, int args, int background) {
 
 void show(long elapsedTime, long pageFaults, long reclaimedPageFaults) {
 	//display the statistics
-	printf("\n-- Satistics ---\n");
+	printf("\n-- Statistics ---\n");
 	printf("Elapsed time: %ld milliseconds\n", elapsedTime);
 	printf("Page Faults: %ld\n", pageFaults);
 	printf("Page Faults (reclaimed): %ld\n", reclaimedPageFaults);
