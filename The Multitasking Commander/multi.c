@@ -32,6 +32,7 @@ char line[1000];
 struct BackgroundJob {
 	int id, running; //running is flag (0 if running)
 	char command[100];
+	pid_t *process;
 };
 
 int jobIndex;
@@ -93,6 +94,8 @@ int main(int argc, char** argv) {
 				
 				//print job if its running flag is 0
 				for(int b = 0; b < jobIndex; b++) {
+					printf("job address: %p %d \n", &jobs[b].running, *jobs[b].process);
+
 					if(jobs[b].running == 0) {
 						printf("[%d] %s\n", jobs[b].id, jobs[b].command);
 					}
@@ -193,36 +196,42 @@ int execute(char* line, char** command, int args, int background) {
 		job.id = jobIndex;
 		job.running = 0;
 		strcpy(job.command, line);
-	
 
-		jobs[jobIndex] = job;
 
 		printf("Background: ID [%d]: %s\n\n", jobIndex, line);
 		
-
+		jobs[jobIndex] = job;
 		
 		int status;
 		pid_t child = fork();
 
+		int holdIndex = jobIndex;
+		
+		pid_t second;
+
 		if(child == 0) {
 
-			pid_t second = fork();
+			second = fork();
+
 			
 			struct timeval start, end;
 			gettimeofday(&start, NULL);
 		
 			if(second == 0) {
 
-			chdir(workingDirectory);
+				chdir(workingDirectory);
 				execvp(command[0], command);
 			} else {
-		
+
+			
 				waitpid(second, NULL, 0);
 				//when jo finishes, say it completed and set running to 1
 				printf("\n-- Job Complete [%i: %s] --\n", jobIndex, line);
 				printf("Process ID: %d\n", second);
-				jobs[jobIndex].running = 1;
 
+				jobs[holdIndex].running = 1;
+				
+			
 				gettimeofday(&end, NULL);
 
 				struct rusage stats;
