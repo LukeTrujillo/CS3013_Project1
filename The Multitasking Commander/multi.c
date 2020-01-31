@@ -32,7 +32,7 @@ char line[1000];
 struct BackgroundJob {
 	int id, running; //running is flag (0 if running)
 	char command[100];
-	pid_t *process;
+	pid_t process;
 };
 
 int jobIndex;
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
 				
 				//print job if its running flag is 0
 				for(int b = 0; b < jobIndex; b++) {
-					printf("job address: %p %d \n", &jobs[b].running, *jobs[b].process);
+					printf("job address: %p %d \n", &jobs[b].running, jobs[b].process);
 
 					if(jobs[b].running == 0) {
 						printf("[%d] %s\n", jobs[b].id, jobs[b].command);
@@ -205,6 +205,8 @@ int execute(char* line, char** command, int args, int background) {
 		int status;
 		pid_t child = fork();
 
+		jobs[jobIndex].process = child;
+
 		int holdIndex = jobIndex;
 		
 		pid_t second;
@@ -222,8 +224,6 @@ int execute(char* line, char** command, int args, int background) {
 				chdir(workingDirectory);
 				execvp(command[0], command);
 			} else {
-
-			
 				waitpid(second, NULL, 0);
 				//when jo finishes, say it completed and set running to 1
 				printf("\n-- Job Complete [%i: %s] --\n", jobIndex, line);
