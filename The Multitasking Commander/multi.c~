@@ -244,6 +244,7 @@ void next() {
 	job.process = fork();
 
 	if(job.process == 0) { //child
+		chdir(workingDirectory);
 		execvp(execCMD[0], execCMD);
 		exit(0); //close the child to avoid bad things
 	}

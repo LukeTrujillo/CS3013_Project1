@@ -15,7 +15,7 @@
 #include <sys/wait.h>
 #include <time.h>
 
-#define MAX_JOBS 10
+#define MAX_JOBS 100
 #define CMD_MAX_LENGTH 1000
 
 void check();
