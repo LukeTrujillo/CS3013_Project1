@@ -233,7 +233,7 @@ void next() {
 		job.background = 1;
 		job.id = lastJobID;
 
-		printf("Background: ID [%i]: %s\n\n\n", job.id, job.command);
+		printf("Background: ID [%i]: %s\n\n", job.id, job.command);
 		lastJobID++;
 	} else {
 		job.background = 0;

@@ -1,16 +1,9 @@
-sleep 10
+ccd /
 ls -alh
-sleep 3
-cproclist
 cpwd
-
-
- 
-
-
-
-
-
+ccd /home
+ls -alh
+cpwd
 
 
 
