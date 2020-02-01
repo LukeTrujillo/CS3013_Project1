@@ -23,6 +23,7 @@ char workingDirectory[100];
 
 
 char* fGetsWithoutNewline(char *line, int buffer, FILE *fp) {
+	//remove the trailing newline char
 	char *result = fgets(line, buffer, fp);
 
 	size_t ln = strlen(line) - 1;
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
 		
 		while(fGetsWithoutNewline(line, 1000, fp)!= NULL && !feof(fp) && strcmp("\n", line)) {
 			char *command[100];
-			
+			//split line at spaces
 			char *word = strtok(line, " ");
 
 			int x = 0;
@@ -68,20 +69,20 @@ int main(int argc, char** argv) {
 			printf("\n");
 
 
-
+			//check if command is ccd
 			if(strcmp(command[0], "ccd") == 0) {
-
+				//change working directory
 				strcpy(workingDirectory, command[1]);
 				printf("Changed to directory: %s\n", workingDirectory);
 				
-				
+			//check if command is cpwd
 			} else if(strcmp(command[0], "cpwd") == 0) {
 				chdir(workingDirectory);
 	
 				char path[100];
 				printf("Current directory: %s\n", getcwd(path, 100));
 
-			} else {
+			} else {//else execute command normally
 			
 				execute(command, x);
 			}
@@ -131,7 +132,7 @@ void execute(char** command, int args) {
 		struct rusage stats;
 		getrusage(RUSAGE_SELF, &stats);
 
-
+		//print statistics
 		show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
 
 		pageFaults = stats.ru_majflt;

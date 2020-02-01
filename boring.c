@@ -17,13 +17,13 @@
 
 int main(int argc, char** argv) {
 
+	//run first command
 	char *command1[] = {"whoami", NULL};
 	execute(command1);
-
+	//run second command
 	char *command2[] = {"last", NULL};
 	execute(command2);
-
-
+	//run third command
 	char *command3[] = {"ls", "-al", "/home", NULL};
 	execute(command3);
 
@@ -36,7 +36,7 @@ long pageFaults = 0, reclaimedPageFaults = 0;
 
 void execute(char** command) {
 	printf("Running command: %s", command[0]);
-
+	//print arguments if they exist
 	if(command[1] != NULL) { 
 		printf(" %s", command[1]);
 		if(command[2] != NULL) {
@@ -68,7 +68,7 @@ void execute(char** command) {
 		struct rusage stats;
 		getrusage(RUSAGE_SELF, &stats);
 
-
+		//display statistics
 		show(((end.tv_sec - start.tv_sec) * 1000.0) + (end.tv_usec - start.tv_usec) / 1000.0, stats.ru_majflt - pageFaults, stats.ru_minflt - reclaimedPageFaults);
 
 		pageFaults = stats.ru_majflt;
