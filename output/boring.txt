@@ -1,0 +1,87 @@
+Running command: whoami
+luke
+
+-- Statistics ---
+Elapsed time: 1 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 76
+-- End of Statistics --
+
+Running command: last
+luke     tty7         :0               Fri Jan 31 19:56    gone - no logout
+reboot   system boot  4.4.203lrtrujill Fri Jan 31 19:54   still running
+luke     tty7         :0               Fri Jan 31 11:05 - crash  (08:48)
+reboot   system boot  4.4.203lrtrujill Fri Jan 31 11:03   still running
+luke     tty7         :0               Fri Jan 31 09:13 - crash  (01:50)
+reboot   system boot  4.4.203lrtrujill Fri Jan 31 09:11   still running
+luke     tty7         :0               Fri Jan 31 08:34 - down   (00:19)
+reboot   system boot  4.4.203lrtrujill Fri Jan 31 08:32 - 08:53  (00:20)
+luke     tty7         :0               Thu Jan 30 16:07 - down   (00:17)
+reboot   system boot  4.4.203lrtrujill Thu Jan 30 16:05 - 16:25  (00:19)
+luke     tty7         :0               Thu Jan 30 12:57 - crash  (03:08)
+reboot   system boot  4.4.203lrtrujill Thu Jan 30 12:55 - 16:25  (03:29)
+luke     tty7         :0               Thu Jan 30 11:23 - crash  (01:31)
+reboot   system boot  4.4.203lrtrujill Thu Jan 30 11:22 - 16:25  (05:02)
+luke     tty7         :0               Wed Jan 29 13:22 - down   (01:09)
+reboot   system boot  4.4.203lrtrujill Wed Jan 29 13:21 - 14:32  (01:10)
+luke     tty7         :0               Tue Jan 28 10:58 - crash (1+02:22)
+reboot   system boot  4.4.203lrtrujill Tue Jan 28 10:57 - 14:32 (1+03:34)
+luke     tty7         :0               Tue Jan 28 09:40 - crash  (01:17)
+reboot   system boot  4.4.203lrtrujill Tue Jan 28 09:38 - 14:32 (1+04:53)
+luke     tty7         :0               Fri Jan 24 09:18 - crash (4+00:19)
+reboot   system boot  4.4.203lrtrujill Fri Jan 24 09:17 - 14:32 (5+05:15)
+luke     tty7         :0               Fri Jan 24 08:06 - crash  (01:10)
+reboot   system boot  4.4.203lrtrujill Fri Jan 24 08:05 - 14:32 (5+06:26)
+luke     tty7         :0               Thu Jan 23 16:38 - crash  (15:26)
+reboot   system boot  4.4.203lrtrujill Thu Jan 23 16:36 - 14:32 (5+21:55)
+luke     tty7         :0               Thu Jan 23 11:10 - crash  (05:26)
+reboot   system boot  4.4.203lrtrujill Thu Jan 23 11:08 - 14:32 (6+03:23)
+luke     tty7         :0               Tue Jan 21 11:10 - crash (1+23:57)
+reboot   system boot  4.4.203lrtrujill Tue Jan 21 11:08 - 14:32 (8+03:23)
+luke     tty7         :0               Tue Jan 21 01:30 - crash  (09:38)
+reboot   system boot  4.4.203lrtrujill Tue Jan 21 01:29 - 14:32 (8+13:03)
+luke     tty7         :0               Tue Jan 21 01:17 - down   (00:10)
+reboot   system boot  4.4.203lrtrujill Tue Jan 21 01:16 - 01:28  (00:12)
+luke     tty7         :0               Tue Jan 21 01:13 - down   (00:02)
+reboot   system boot  4.4.203lrtrujill Tue Jan 21 01:11 - 01:15  (00:04)
+luke     tty7         :0               Mon Jan 20 20:01 - crash  (05:10)
+reboot   system boot  4.4.203lrtrujill Mon Jan 20 19:59 - 01:15  (05:16)
+luke     tty7         :0               Mon Jan 20 19:44 - crash  (00:15)
+reboot   system boot  4.4.203lrtrujill Mon Jan 20 19:42 - 01:15  (05:33)
+luke     tty7         :0               Mon Jan 20 13:06 - down   (06:35)
+reboot   system boot  4.4.0-171-generi Mon Jan 20 13:04 - 19:42  (06:37)
+luke     tty7         :0               Mon Jan 20 11:55 - down   (00:01)
+reboot   system boot  4.4.0-171-generi Mon Jan 20 11:55 - 11:57  (00:01)
+luke     tty7         :0               Mon Jan 20 11:46 - crash  (00:08)
+reboot   system boot  4.4.0-171-generi Mon Jan 20 11:46 - 11:57  (00:11)
+luke     tty7         :0               Mon Jan 20 11:41 - down   (00:00)
+reboot   system boot  4.4.0-171-generi Mon Jan 20 11:41 - 11:42  (00:01)
+luke     tty7         :0               Mon Jan 20 11:38 - crash  (00:02)
+reboot   system boot  4.4.0-171-generi Mon Jan 20 11:37 - 11:42  (00:04)
+luke     tty7         :0               Mon Jan 20 10:19 - crash  (01:18)
+reboot   system boot  4.4.0-171-generi Mon Jan 20 10:18 - 11:42  (01:23)
+luke     tty7         :0               Sun Jan 19 14:16 - crash  (20:01)
+reboot   system boot  4.4.0-171-generi Sun Jan 19 14:16 - 11:42  (21:25)
+luke     tty7         :0               Sun Jan 19 12:24 - crash  (01:51)
+reboot   system boot  4.4.0-31-generic Sun Jan 19 12:24 - 11:42  (23:17)
+
+wtmp begins Sun Jan 19 12:24:16 2020
+
+-- Statistics ---
+Elapsed time: 2 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 5
+-- End of Statistics --
+
+Running command: ls -al /home
+total 12
+drwxr-xr-x  3 root root 4096 Jan 19 12:19 .
+drwxr-xr-x 24 root root 4096 Jan 29 13:24 ..
+drwxr-xr-x 18 luke luke 4096 Jan 31 19:56 luke
+
+-- Statistics ---
+Elapsed time: 1 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 6
+-- End of Statistics --
+

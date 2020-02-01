@@ -1,0 +1,59 @@
+total 108K
+drwxr-xr-x  24 root root 4.0K Jan 29 13:24 .
+drwxr-xr-x  24 root root 4.0K Jan 29 13:24 ..
+drwxr-xr-x   2 root root 4.0K Jan 19 12:35 bin
+drwxr-xr-x   3 root root 4.0K Jan 29 13:24 boot
+drwxrwxr-x   2 root root 4.0K Jan 19 12:18 cdrom
+drwxr-xr-x  18 root root 3.8K Jan 31 19:56 dev
+drwxr-xr-x 131 root root  12K Jan 29 13:24 etc
+drwxr-xr-x   3 root root 4.0K Jan 19 12:19 home
+drwxr-xr-x   3 root root 4.0K Jan 20 10:38 include
+lrwxrwxrwx   1 root root   33 Jan 19 12:48 initrd.img -> boot/initrd.img-4.4.0-171-generic
+drwxr-xr-x  22 root root 4.0K Jan 19 12:32 lib
+drwx------   2 root root  16K Jan 19 12:15 lost+found
+drwxr-xr-x   2 root root 4.0K Jul 19  2016 media
+drwxr-xr-x   2 root root 4.0K Jul 19  2016 mnt
+drwxr-xr-x   2 root root 4.0K Jul 19  2016 opt
+dr-xr-xr-x 189 root root    0 Jan 31 19:54 proc
+drwx------   4 root root 4.0K Jan 20 10:26 root
+drwxr-xr-x  25 root root  780 Jan 31 19:56 run
+drwxr-xr-x   2 root root  12K Jan 19 12:38 sbin
+drwxr-xr-x   2 root root 4.0K Jan 19 12:42 snap
+drwxr-xr-x   2 root root 4.0K Jul 19  2016 srv
+dr-xr-xr-x  13 root root    0 Jan 31 20:09 sys
+drwxrwxrwt  10 root root 4.0K Jan 31 20:08 tmp
+drwxr-xr-x  12 root root 4.0K Jan 19 12:47 usr
+drwxr-xr-x  14 root root 4.0K Jul 19  2016 var
+lrwxrwxrwx   1 root root   30 Jan 19 12:48 vmlinuz -> boot/vmlinuz-4.4.0-171-generic
+total 12K
+drwxr-xr-x  3 root root 4.0K Jan 19 12:19 .
+drwxr-xr-x 24 root root 4.0K Jan 29 13:24 ..
+drwxr-xr-x 18 luke luke 4.0K Jan 31 19:56 luke
+
+Running command: ccd /
+Changed to directory: /
+
+Running command: ls -alh
+
+-- Statistics ---
+Elapsed time: 1 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 126
+-- End of Statistics --
+
+Running command: cpwd
+Current directory: /
+
+Running command: ccd /home
+Changed to directory: /home
+
+Running command: ls -alh
+
+-- Statistics ---
+Elapsed time: 7 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 133
+-- End of Statistics --
+
+Running command: cpwd
+Current directory: /home

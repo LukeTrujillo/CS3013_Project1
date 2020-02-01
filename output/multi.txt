@@ -1,0 +1,67 @@
+Running command: sleep 10
+Background: ID [0]: sleep 10
+
+
+Running command: ls -alh
+total 100K
+drwxrwxr-x 4 luke luke 4.0K Jan 31 20:14 .
+drwxr-xr-x 4 luke luke 4.0K Jan 23 11:11 ..
+-rwxrwxr-x 1 luke luke 7.6K Jan 31 20:11 boring
+-rw-rw-r-- 1 luke luke 1.7K Jan 24 08:39 boring.c
+-rw-rw-r-- 1 luke luke  275 Jan 24 08:38 boring.h
+-rwxrwxr-x 1 luke luke  13K Jan 31 20:11 custom
+-rw-rw-r-- 1 luke luke 2.8K Jan 31 11:21 custom.c
+-rw-rw-r-- 1 luke luke   55 Jan 28 11:30 custom.txt
+drwxrwxr-x 8 luke luke 4.0K Jan 31 18:57 .git
+-rw-rw-r-- 1 luke luke   10 Jan 24 08:09 .gitignore
+-rw-rw-r-- 1 luke luke  225 Jan 31 20:08 makefile
+-rw-rw-r-- 1 luke luke  150 Jan 31 20:07 makefile~
+-rwxrwxr-x 1 luke luke  13K Jan 31 20:11 multi
+-rw-rw-r-- 1 luke luke 4.7K Jan 31 18:46 multi.c
+-rw-rw-r-- 1 luke luke   41 Jan 31 20:14 multi.txt
+-rw-rw-r-- 1 luke luke    0 Jan 31 20:11 multi.txt~
+drwxrwxr-x 2 luke luke 4.0K Jan 31 20:13 output
+-rw-rw-r-- 1 luke luke   18 Jan 23 11:15 README.md
+
+-- Statistics ---
+Elapsed time: 2 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 125
+-- End of Statistics --
+
+Running command: sleep 3
+Background: ID [1]: sleep 3
+
+
+Running command: cproclist
+[0] sleep 10
+[1] sleep 3
+
+Running command: cpwed
+
+-- Statistics ---
+Elapsed time: 0 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 25
+-- End of Statistics --
+
+-- Job Complete[1: sleep 3]--
+Process ID: 2379
+
+
+-- Statistics ---
+Elapsed time: 3000 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 66
+-- End of Statistics --
+
+-- Job Complete[0: sleep 10]--
+Process ID: 2377
+
+
+-- Statistics ---
+Elapsed time: 10001 milliseconds
+Page Faults: 0
+Page Faults (reclaimed): 64
+-- End of Statistics --
+
