@@ -2,7 +2,7 @@
  
 === Compiling the Program ===
 
-To compile all files, use the command `make` or `make all`. To compile just boring.c, run `make boring`. To compile just custom.c, run `make custom`. To compile just multi.c, run `make multi`. These compile to executables called `boring`, `custom`, and `multi`, respectively.
+To compile all files, use the command `make` or `make all`. To compile just boring.c, run `make boring`. To compile just custom.c, run `make custom`. To compile just multi.c, run `make multi`. These compile to executables called `boring`, `custom`, and `multi`, respectively. Run `make clean` to clean the directory.
 
 
 === Basic Commander ===
