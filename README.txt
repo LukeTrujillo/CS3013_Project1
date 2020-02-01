@@ -18,7 +18,7 @@ The program also has two new commands: `ccd` and `cpwd`. The `ccd` command chang
 
 === Multi Commander ===
 
-Our program was made to only allow 100 commands and each command must be under 1000 characters. 
+Our program was made to only allow 100 commands and each command must be under 1000 characters. The user can specify background commands by putting the line number of a command in as a command line argument.
 
 Our program was tested by trying different combinations of commands and sending different tasks to be background tasks.
 
