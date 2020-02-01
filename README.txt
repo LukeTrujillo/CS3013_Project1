@@ -1,7 +1,14 @@
-# CS3013_Project1
+ CS3013_Project1
+ 
+ 
+ === Basic Commander ===
+ This program was tested by comparing the output given in the Project document to that outputted in the file.
+ 
+ === Custom Commander ===
+This program can only accept commands under 1000 character. We tested this program by trying different combinations of input.
 
 
-Multi Commander
+=== Multi Commander ===
 
 Our program was made to only allow 100 commands and each command must be under 1000 characters. 
 
